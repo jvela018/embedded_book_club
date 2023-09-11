@@ -6,4 +6,4 @@ Our main focus is to treat this group as a book club, where we select a book or 
 
 One of my goals is to create a tight knowledge sharing community in Finland, that focuses on topics from the basics to future trends.
 
-![EBC Logo](EBC_logo.png.png)
+![EBC Logo](EBC_logo.png)
