@@ -5,9 +5,13 @@ This repository is to organize slides, information, and code snippets, created f
 __Book details__:
 
 __Title__: Linux Device Driver Development
+
 __Author__: John Madieu
+
 __Edition__: Second
+
 __Publisher__: Packt
+
 
 
 
