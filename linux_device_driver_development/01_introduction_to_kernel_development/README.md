@@ -13,7 +13,7 @@ This chapter covers how to set up your development environment, how to configure
         unxip texinfo gcc-multiplib \
         build-essential chrpath socat \
         libsdl1.2-dev xterm ncurses-dev \
-        lzop libelf-dev make
+        lzop libelf-dev make flex bison
     ```
 
 2. Install toolchain (binutils + cross compiler)
@@ -37,3 +37,5 @@ This chapter covers how to set up your development environment, how to configure
     ```
     git clone https://github.com/torvalds/linux.git linux-stable --depth 1
     ```
+
+## Configuring the Kernel
