@@ -46,9 +46,9 @@ This chapter covers how to set up your development environment, how to configure
     ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make menuconfig
     ```
 
-    ## Building the Kernel
+## Building the Kernel
 
-    1. The make target will build all: vmlinux, zImage modules, and dtbs. The author of the book builds using nprocs*2
+1. The make target will build all: vmlinux, zImage modules, and dtbs. The author of the book builds using nprocs*2
 
     ```
     ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make -j$(nprocs)
