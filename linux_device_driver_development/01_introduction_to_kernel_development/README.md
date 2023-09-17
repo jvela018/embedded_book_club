@@ -53,3 +53,4 @@ This chapter covers how to set up your development environment, how to configure
     ```
     ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make -j$(nprocs)
     ```
+You can also build each step at the time (e.g., make zImage, make modules, make modules_install )
