@@ -39,3 +39,17 @@ This chapter covers how to set up your development environment, how to configure
     ```
 
 ## Configuring the Kernel
+
+1. Use menuconfig target. You might want to export ARCH and CROSS_COMPILE for simplicity. This way you can reuse these variables in the same shell, during the build process
+
+    ```
+    ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make menuconfig
+    ```
+
+    ## Building the Kernel
+
+    1. The make target will build all: vmlinux, zImage modules, and dtbs. The author of the book builds using nprocs*2
+
+    ```
+    ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make -j$(nprocs)
+    ```
