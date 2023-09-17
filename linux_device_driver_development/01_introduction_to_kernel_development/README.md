@@ -35,7 +35,7 @@ This chapter covers how to set up your development environment, how to configure
 1. Clone Linus' stable release
 
     ```
-    git clone https://github.com/torvalds/linux.git --depth 1
+    git clone https://github.com/torvalds/linux.git linux-stable
     ```
 
 
