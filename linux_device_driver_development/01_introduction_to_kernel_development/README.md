@@ -46,6 +46,12 @@ This chapter covers how to set up your development environment, how to configure
     ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make menuconfig
     ```
 
+you can also start from a generic configuration file found under arch/arm/configs/*
+
+    ```
+    ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make imx_v6_v7_defconfig
+    ```
+
 ## Building the Kernel
 
 1. The make target will build all: vmlinux, zImage modules, and dtbs. The author of the book builds using nprocs*2
