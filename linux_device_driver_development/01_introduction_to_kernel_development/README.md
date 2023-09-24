@@ -7,6 +7,7 @@ This chapter covers how to set up your development environment, how to configure
 ## Setting up your environment
 
 1. Install packages in Debian system
+   
     ```
     sudo apt update;
     sudo apt install gawk wget git diffstat \ 
@@ -66,3 +67,12 @@ You can also build each step at the time (e.g., make zImage, make modules )
     ```
     ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- INSTALL_MOD_PATH=<DIR> make modules_install
     ```
+
+
+## Buildroot
+
+Building everything needed to setup the board (i.e., booloader, kernel, etc) can be quite challenging. Using a build system can be quite helpful. A good option for simple embedded systems is Buildroot. For more complex projects see the Yocto Project.
+
+For a good starting point to use buildroot to build a minimal linux system for the beaglebone black: [Bill Van Leeuwen's blog](https://blog.billvanleeuwen.ca/creating-a-minimal-linux-system-for-the-beaglebone-black-with-buildroot) 
+
+
