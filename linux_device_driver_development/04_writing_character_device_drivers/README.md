@@ -22,9 +22,9 @@ First column determines the type of file. If it starts with a __c__ or a __b__, 
 
 ### cdev
 
-Character devices are represented as an instance of a structure named cdev, found in include/linux/cdev.h
+Character devices are represented as an instance of a structure named cdev, found in __include/linux/cdev.h__
 
-For simplicity, let's assume you didn't go through the first two chapters of the book. Your ubuntu distribution has its own headerfiles you can dig into, and if you don't have them, you can just use your package manager to get them. You can find cdev.h under /usr/src/linux-headers-5.15.0-84-generic/include/linux/. Note that these are my headefiles version, so you might have to change the version to look into what you've got.
+For simplicity, let's assume you didn't go through the first two chapters of the book. Your ubuntu distribution has its own headerfiles you can dig into, and if you don't have them, you can just use your package manager to get them. You can find cdev.h under __/usr/src/linux-headers-5.15.0-84-generic/include/linux/__. Note that these are my headefiles version, so you might have to change the version to look into what you've got.
 
     ```bash
     vim /usr/src/linux-headers-5.15.0-84-generic/include/linux/cdev.h
@@ -66,3 +66,38 @@ These operations can be found under __linux/fs.h__. A snippet of this structure
         ...
     ```
 
+### File representation in the Kernel
+
+There are two main structures that are fundamental to the file operations. If you pay attention to the arguments taken by the file operation methods, there are two that are consistent throughout all of them: __inode__ and __file__ . They're both defined in __linux/fs.h__
+
+ 
+    ```c
+    struct inode {
+    ...
+    union {
+        struct pipe_inode_info  *i_pipe;
+        struct cdev     *i_cdev;
+        char            *i_link;
+        unsigned        i_dir_seq;
+    };
+    ...
+    ```
+
+The structure __i_cdev__ enables direct interaction to the character device structure cdev. 
+
+File is NOT FILE from the file descriptor in userspace. It's a filesystem structure that holds information about a file.
+
+    ```c
+    struct file {
+        ...
+        struct path          f_path;
+        struct inode        *f_inode;   /* cached value */
+        const struct file_operations    *f_op;
+        loff_t f_pos;
+        void *private_data;
+        ...
+    ```
+__fpath__ represents the path to de file, and __f_inode__ the underlying inode pointing to the opened file. Hence, you can interact with __cdev__ through the inode.
+
+
+## How to create device nodes
