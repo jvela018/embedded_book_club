@@ -51,15 +51,18 @@ These operations can be found under __linux/fs.h__. A snippet of this structure
     ```c
     struct file_operations {
         struct module *owner;                                                       // mandatory field pointing to the module owning this structure __THIS_MODULE
-        loff_t (*llseek) (struct file *, loff_t, int);                              //
-        ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);           //
-        ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);    //
-        int (*flush) (struct file *, fl_owner_t id);                                //
-        __poll_t (*poll) (struct file *, struct poll_table_struct *); // in the book the return type is unsigned int
-        int (*mmap) (struct file *, struct vm_area_struct *);
-        int (*open) (struct inode *, struct file *);
-        int (*release) (struct inode *, struct file *);
-        int (*fsync) (struct file *, loff_t, loff_t, int datasync);
+        loff_t (*llseek) (struct file *, loff_t, int);                              // move cursor. Success: new position. Fail: negative value
+        ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);           // retreive data. Sucess: number of bytes read. Fail: -EINVAL
+        ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);    // send data. Sucess: number of bytes written. Fail: -EINVAL
+        int (*flush) (struct file *, fl_owner_t id);                                // invoked when structured is released. Sucess: int. Fail: NULL
+        __poll_t (*poll) (struct file *, struct poll_table_struct *);               // in the book the return type is unsigned int. Returns bitmask describing status of the device. Used to query whether device is writable, readable or in special state. If method not implemented, it's assumed that the device is always readable, writeable and in no special state. 
+        int (*mmap) (struct file *, struct vm_area_struct *);                       // Used for memory mapped devices. Sucess: int. Fail: -ENODEV
+        int (*open) (struct inode *, struct file *);                                // Backend of open system call. If not implemented it will always be successful.
+        int (*release) (struct inode *, struct file *);                             // Response to the close system call. It's not mandatory and can be NULL like open.
+        int (*fsync) (struct file *, loff_t, loff_t, int datasync);                 // Backend of fsync. Flush any pending data. If not implemented, it will fail and return -EINVAL.
+        long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long);        // Backend of ioctl system call. Extends predefined commands beyond reading and writing. Sucess: non-negative value. Fail: -ENOTTY no such ioctl for device
+        
+        
         ...
     ```
 
