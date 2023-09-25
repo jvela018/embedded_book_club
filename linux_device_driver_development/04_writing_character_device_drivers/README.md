@@ -26,14 +26,14 @@ Character devices are represented as an instance of a structure named cdev, foun
 
 For simplicity, let's assume you didn't go through the first two chapters of the book. Your ubuntu distribution has its own headerfiles you can dig into, and if you don't have them, you can just use your package manager to get them. You can find cdev.h under __/usr/src/linux-headers-5.15.0-84-generic/include/linux/__. Note that these are my headefiles version, so you might have to change the version to look into what you've got.
 
-    ```bash
+```bash
     vim /usr/src/linux-headers-5.15.0-84-generic/include/linux/cdev.h
 
-    ```
+```
 
 Let's look at the data structure
 
-    ```c
+```c
     struct cdev {
         struct kobject kobj;
         struct module *owner;
@@ -43,14 +43,14 @@ Let's look at the data structure
         unsigned int count;
     } __randomize_layout;
 
-    ```
+```
 
 ### file_operations
 
 The operations supported by a given device are represented by cdev->fops, where fops is an instance of the file_operations structure. 
 These operations can be found under __linux/fs.h__. A snippet of this structure
 
-    ```c
+```c
     struct file_operations {
         struct module *owner;                                                       // mandatory field pointing to the module owning this structure __THIS_MODULE
         loff_t (*llseek) (struct file *, loff_t, int);                              // move cursor. Success: new position. Fail: negative value
@@ -67,14 +67,14 @@ These operations can be found under __linux/fs.h__. A snippet of this structure
         
         ...
 
-    ```
+```
 
 ### File representation in the Kernel
 
 There are two main structures that are fundamental to the file operations. If you pay attention to the arguments taken by the file operation methods, there are two that are consistent throughout all of them: __inode__ and __file__ . They're both defined in __linux/fs.h__
 
  
-    ```c
+```c
     struct inode {
     ...
     union {
@@ -85,13 +85,13 @@ There are two main structures that are fundamental to the file operations. If yo
     };
     ...
 
-    ```
+```
 
 The structure __i_cdev__ enables direct interaction to the character device structure cdev. 
 
 File is NOT FILE from the file descriptor in userspace. It's a filesystem structure that holds information about a file.
 
-    ```c
+```c
     struct file {
         ...
         struct path          f_path;
@@ -101,7 +101,7 @@ File is NOT FILE from the file descriptor in userspace. It's a filesystem struct
         void *private_data;
         ...
 
-    ```
+```
 __fpath__ represents the path to de file, and __f_inode__ the underlying inode pointing to the opened file. Hence, you can interact with __cdev__ through the inode.
 
 
@@ -120,7 +120,7 @@ __fpath__ represents the path to de file, and __f_inode__ the underlying inode p
 - The minor number is represented by 20 bits.
 - You can use the macros under __linux/kdev_t.h__ to retreive major, minor, device numbers, etc.
 
-    ```c
+```c
     #define MINORBITS   20
     #define MINORMASK   ((1U << MINORBITS) - 1)
 
@@ -128,7 +128,7 @@ __fpath__ represents the path to de file, and __f_inode__ the underlying inode p
     #define MINOR(dev)  ((unsigned int) ((dev) & MINORMASK))
     #define MKDEV(ma,mi)    (((ma) << MINORBITS) | (mi))
 
-    ```
+    ``
 
 ### Registration and deregistration of character device numbers
 
@@ -139,22 +139,22 @@ In __linux/fs.h__
 
 __Static allocation__
 
-    ```c
+```c
     int register_chrdev_region (dev_t first,
  	    unsigned count,
  	    const char * name);
 
-    ```
+```
 
 __Dynamic allocation__
 
-    ```c
+```c
     int alloc_chrdev_region (dev_t * dev,
         unsigned baseminor,
         unsigned count,
         const char * name);
 
-    ```
+```
 
 2. Initialize and register a character device driver on the system
 
@@ -165,20 +165,20 @@ __Dynamic allocation__
 
 __Initialization__
 
-    ```c
+```c
     void cdev_init (	struct cdev * cdev,
         const struct file_operations * fops);
 
-    ```
+```
 
 __Add__
 
-    ```c
+```c
     int cdev_add (	struct cdev * p,
         dev_t dev,
         unsigned count);
 
-    ```
+```
 
 - The book mentiones __void cdev(struct dev *)__ as the reverse operation to __cdev_add__, however, I'll leave the operations related removing the device from the system in a single section at the end.
 
@@ -190,24 +190,24 @@ __Create Class__
 
     - The class will be visible under __/sys/class__
 
-    ```c
+```c
     struct class * class_create(struct module * owner,
                                     const char * name);
 
-    ```
+```
 
 __Create Device__
 
 - This will create a device under __/dev__ associated to the class in __sysfs__
 
-    ```c
+```c
     struct device * device_create(struct class *class,
                                     struct device *parent,
                                     dev_t devt,
                                     void *drvdata,
                                     const char *fmt, ...);
 
-    ```
+```
 
     - The book has a character device driver example in page 151.
 
@@ -217,13 +217,13 @@ __Removing everything from the system__
     - Just like we implemented the steps to register a device on __sysfs__, everything needs to be removed when unloading the driver.
     - The steps are the same steps taken earlier, but in reverse order.
 
-    ```c
+```c
     void device_destroy(struct class *cls, dev_t devt);
     void class_destroy(struct class *cls);
     void cdev_del(struct cdev *);
     void unregister_chrdev_region(dev_t, unsigned);
 
-    ```
+```
 
 ## Implementing file operations
 
@@ -233,31 +233,95 @@ __Removing everything from the system__
 
 Let's revisit the read/write methods 
 
-    ```c
+```c
     ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);           // retreive data. Sucess: number of bytes read. Fail: -EINVAL
     ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);    // send data. Sucess: number of bytes written. Fail: -EINVAL
 
         ...
 
-    ```
+```
 
 - The use of __user prevents the direct interaction between user space and kernel space
 - This is a cookie used by a semantic checker called Sparse to let the developer know they're about to use an unstrusted pointer.
 - Two exchange data two functions are available to copy from user space to kernel space and vice versa
 
-    ```c
+```c
     unsigned long copy_from_user(void *to, const void __user *from, unsigned long count)
     
-    ```
+```
 
-    ```c
+```c
     unsigned long copy_to_user(void __user *to, const void *from, unsigned long count)
     
-    ```
+```
 
     - count = bytes_to_copy
     - Upon success they return the number of bytes succesfully read/written
 
 
+- I will only go over the open and the write operations. The rest can be read from the book.
+
 ### The Open File Operation 
 
+```c
+int (*open) (struct inode *inode, struct file *filp);                     
+```
+
+- If it's not implemented it will always succed but the driver won't be aware of it.
+- The book goes through an example.
+- Check out the chapter 4 example of the open file operation in the book's [Linux Device Driver Development Repo](https://github.com/PacktPublishing/Linux-Device-Driver-Development-Second-Edition)
+- Let's go over the book example (p.154)
+- Go over container_of
+
+
+### The write file operation
+
+
+```c
+ssize_t (*write) (struct file *filp, const char __user *buf, size_t count, loff_t *pos);    // send data. Sucess: number of bytes written. Fail: -EINVAL
+```
+
+- *buf is the data buffer coming from user space
+- count is the number of bytes requested
+- *pos is the start position from which data is written
+
+
+1. Check for bad or invalid requests. Here filesize is the device memory size (not mandatory)
+
+```c
+if (*pos >= filesize) return -EINVAL;
+```
+
+2. Make sure that you don't write beyond file size (not mandatory)
+
+```c
+if (*pos + count > filesize)
+    count = filesize - *pos;
+```
+
+3. If the device is backed by physical memory (not mandatory)
+```c
+void *from = pos_to_address(*pos);
+```
+
+4. Copy data from user space into kernel memory
+
+```c
+if (copy_from_user(dev->buffer, buf, count) != 0){
+    retval = -EFAULT;
+    goto out;
+}
+
+5. Move data from buffer to physical device and update position
+
+```c
+write_error = device_write(dev->buffer, count)
+if(write_error)
+    return -EFAULT;
+
+*pos += count;
+return count;
+
+```
+
+### The ioctl file operation
