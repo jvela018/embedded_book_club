@@ -5,28 +5,29 @@
 
 ## Hello World
 
-	```
-	#include <linux/module.h>   /* Needed by all modules */
-	#include <linux/kernel.h>   /* Needed for KERN_INFO */
+```c
+#include <linux/module.h>   /* Needed by all modules */
+#include <linux/kernel.h>   /* Needed for KERN_INFO */
 
-	static int __init init_hello(void)
-	{
-    	printk(KERN_INFO "Hello world !.\n");
-    	return 0;
-	}
+static int __init init_hello(void)
+{
+	printk(KERN_INFO "Hello world !.\n");
+    return 0;
+}
 
-	static void __exit exit_hello(void)
-	{
-    	printk(KERN_INFO "Goodbye world !.\n");
-	}
+static void __exit exit_hello(void)
+{
+	printk(KERN_INFO "Goodbye world !.\n");
+}
 
 
-	module_init(init_hello);
-	module_exit(exit_hello);
+module_init(init_hello);
+module_exit(exit_hello);
 
-	MODULE_LICENSE("GPL");
-	MODULE_AUTHOR("Embedded Club Finland");
-	```
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Embedded Club Finland");
+
+```
 
 ## Create Makefile and Build Module
 
@@ -34,33 +35,33 @@
 
 2. Create Makefile and edit accordingly
 
-	```
-    obj-m := hello.o
+```bash
+obj-m := hello.o
 
-	KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 
-	all default: 
-    	make -C ${KERNEL_SRC} M=$(shell pwd) modules
+all default: 
+    make -C ${KERNEL_SRC} M=$(shell pwd) modules
 
-	clean:
-    	make -C ${KERNEL_SRC} M=$(shell pwd) clean
+clean:
+	make -C ${KERNEL_SRC} M=$(shell pwd) clean
 
-	``` 
+``` 
 
 
 ## Load and Unload modules
 
-	```
-	sudo insmod hello.ko
-	```
+```bash
+sudo insmod hello.ko
+```
 
-	```
-	sudo rmmod hello
-	```
+```bash
+sudo rmmod hello
+```
 
 ## Play with parameters
 
 
-	```
-	module_param(name, type, perm)
-	```
+```bash
+module_param(name, type, perm)
+```
