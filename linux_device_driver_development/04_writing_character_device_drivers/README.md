@@ -185,10 +185,9 @@ __Add__
 - Once the character device is added to the system, you need to make it physically available to the user (under /dev).
 - We first need to either use an existing class or create one
 - The __class_create__ and __device_create__ functions will create and register a device with __sysfs__
+- The class will be visible under __/sys/class__
 
 __Create Class__
-
-    - The class will be visible under __/sys/class__
 
 ```c
     struct class * class_create(struct module * owner,
