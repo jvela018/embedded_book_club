@@ -121,14 +121,14 @@ __fpath__ represents the path to de file, and __f_inode__ the underlying inode p
 - You can use the macros under __linux/kdev_t.h__ to retreive major, minor, device numbers, etc.
 
 ```c
-    #define MINORBITS   20
-    #define MINORMASK   ((1U << MINORBITS) - 1)
+#define MINORBITS   20
+#define MINORMASK   ((1U << MINORBITS) - 1)
 
-    #define MAJOR(dev)  ((unsigned int) ((dev) >> MINORBITS))
-    #define MINOR(dev)  ((unsigned int) ((dev) & MINORMASK))
-    #define MKDEV(ma,mi)    (((ma) << MINORBITS) | (mi))
+#define MAJOR(dev)  ((unsigned int) ((dev) >> MINORBITS))
+#define MINOR(dev)  ((unsigned int) ((dev) & MINORMASK))
+#define MKDEV(ma,mi)    (((ma) << MINORBITS) | (mi))
 
-    ``
+```
 
 ### Registration and deregistration of character device numbers
 
