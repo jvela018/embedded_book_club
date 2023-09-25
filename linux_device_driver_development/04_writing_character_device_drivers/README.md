@@ -101,3 +101,52 @@ __fpath__ represents the path to de file, and __f_inode__ the underlying inode p
 
 
 ## How to create device nodes
+
+- Device nodes makes the interaction with underlying devices possible. 
+- Identifiers can be statically or dynamically allocated. 
+- Most drivers still use static identifiers due to compatibility issues.
+
+
+### dev_t
+
+- The __dev_t__ type is a 32-bit tuple that stores major and minor device numbers 
+- The major number is represented by 12 bits
+- The minor number is represented by 20 bits.
+- You can use the macros under __linux/kdev_t.h__ to retreive major, minor, device numbers, etc.
+
+    ```c
+    #define MINORBITS   20
+    #define MINORMASK   ((1U << MINORBITS) - 1)
+
+    #define MAJOR(dev)  ((unsigned int) ((dev) >> MINORBITS))
+    #define MINOR(dev)  ((unsigned int) ((dev) & MINORMASK))
+    #define MKDEV(ma,mi)    (((ma) << MINORBITS) | (mi))
+
+    ```
+
+### Registration and deregistration of character device numbers
+
+In __linux/fs.h__
+
+
+1. Create device numbers
+
+__Static allocation__
+
+    ```c
+    int register_chrdev_region (dev_t first,
+ 	    unsigned count,
+ 	    const char * name);
+    ```
+
+__Dynamic allocation__
+
+    ```c
+    int alloc_chrdev_region (dev_t * dev,
+        unsigned baseminor,
+        unsigned count,
+        const char * name);
+    ```
+
+2. Initialize and register a character device driver on the system
+
