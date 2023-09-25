@@ -11,9 +11,9 @@
 
 Devices file identification is envorced by unique identifier composed of a major and a minor number.
 	
-    ``` bash
+``` bash
     ls  -la /dev
-    ``
+```
 
 First column determines the type of file. If it starts with a __c__ or a __b__, it's a character or a block device. The major number represents the device type or associated driver, whereas the minor number the device itself. 
 
@@ -28,6 +28,7 @@ For simplicity, let's assume you didn't go through the first two chapters of the
 
     ```bash
     vim /usr/src/linux-headers-5.15.0-84-generic/include/linux/cdev.h
+
     ```
 
 Let's look at the data structure
@@ -41,6 +42,7 @@ Let's look at the data structure
         dev_t dev;
         unsigned int count;
     } __randomize_layout;
+
     ```
 
 ### file_operations
@@ -64,6 +66,7 @@ These operations can be found under __linux/fs.h__. A snippet of this structure
         
         
         ...
+
     ```
 
 ### File representation in the Kernel
@@ -81,6 +84,7 @@ There are two main structures that are fundamental to the file operations. If yo
         unsigned        i_dir_seq;
     };
     ...
+
     ```
 
 The structure __i_cdev__ enables direct interaction to the character device structure cdev. 
@@ -96,6 +100,7 @@ File is NOT FILE from the file descriptor in userspace. It's a filesystem struct
         loff_t f_pos;
         void *private_data;
         ...
+
     ```
 __fpath__ represents the path to de file, and __f_inode__ the underlying inode pointing to the opened file. Hence, you can interact with __cdev__ through the inode.
 
@@ -105,6 +110,7 @@ __fpath__ represents the path to de file, and __f_inode__ the underlying inode p
 - Device nodes makes the interaction with underlying devices possible. 
 - Identifiers can be statically or dynamically allocated. 
 - Most drivers still use static identifiers due to compatibility issues.
+- I took most prototypes from [Kernel API](https://archive.kernel.org/oldlinux/htmldocs/kernel-api)
 
 
 ### dev_t
@@ -137,6 +143,7 @@ __Static allocation__
     int register_chrdev_region (dev_t first,
  	    unsigned count,
  	    const char * name);
+
     ```
 
 __Dynamic allocation__
@@ -146,7 +153,111 @@ __Dynamic allocation__
         unsigned baseminor,
         unsigned count,
         const char * name);
+
     ```
 
 2. Initialize and register a character device driver on the system
+
+- The book uses dynamic allocation in this chapter
+- To register the device you'll need to have created a device number __dev_t__
+- The character device must be initialized __cdev_init()__
+- After initialization, you must add the character device __cdev_add()__
+
+__Initialization__
+
+    ```c
+    void cdev_init (	struct cdev * cdev,
+        const struct file_operations * fops);
+
+    ```
+
+__Add__
+
+    ```c
+    int cdev_add (	struct cdev * p,
+        dev_t dev,
+        unsigned count);
+
+    ```
+
+- The book mentiones __void cdev(struct dev *)__ as the reverse operation to __cdev_add__, however, I'll leave the operations related removing the device from the system in a single section at the end.
+
+- Once the character device is added to the system, you need to make it physically available to the user (under /dev).
+- We first need to either use an existing class or create one
+- The __class_create__ and __device_create__ functions will create and register a device with __sysfs__
+
+__Create Class__
+
+    - The class will be visible under __/sys/class__
+
+    ```c
+    struct class * class_create(struct module * owner,
+                                    const char * name);
+
+    ```
+
+__Create Device__
+
+- This will create a device under __/dev__ associated to the class in __sysfs__
+
+    ```c
+    struct device * device_create(struct class *class,
+                                    struct device *parent,
+                                    dev_t devt,
+                                    void *drvdata,
+                                    const char *fmt, ...);
+
+    ```
+
+    - The book has a character device driver example in page 151.
+
+
+__Removing everything from the system__
+
+    - Just like we implemented the steps to register a device on __sysfs__, everything needs to be removed when unloading the driver.
+    - The steps are the same steps taken earlier, but in reverse order.
+
+    ```c
+    void device_destroy(struct class *cls, dev_t devt);
+    void class_destroy(struct class *cls);
+    void cdev_del(struct cdev *);
+    void unregister_chrdev_region(dev_t, unsigned);
+
+    ```
+
+## Implementing file operations
+
+- Expose the device methods to userspace by means of system calls
+
+### Kernel Space vs User Space
+
+Let's revisit the read/write methods 
+
+    ```c
+    ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);           // retreive data. Sucess: number of bytes read. Fail: -EINVAL
+    ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);    // send data. Sucess: number of bytes written. Fail: -EINVAL
+
+        ...
+
+    ```
+
+- The use of __user prevents the direct interaction between user space and kernel space
+- This is a cookie used by a semantic checker called Sparse to let the developer know they're about to use an unstrusted pointer.
+- Two exchange data two functions are available to copy from user space to kernel space and vice versa
+
+    ```c
+    unsigned long copy_from_user(void *to, const void __user *from, unsigned long count)
+    
+    ```
+
+    ```c
+    unsigned long copy_to_user(void __user *to, const void *from, unsigned long count)
+    
+    ```
+
+    - count = bytes_to_copy
+    - Upon success they return the number of bytes succesfully read/written
+
+
+### The Open File Operation 
 
