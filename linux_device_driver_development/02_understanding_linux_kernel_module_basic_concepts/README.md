@@ -55,9 +55,17 @@ clean:
 sudo insmod hello.ko
 ```
 
+Check if module was loaded
+
+```bash
+ls -al /sys/module | grep hello
+```
+
 ```bash
 sudo rmmod hello
 ```
+
+Check if module was removed
 
 ## Play with parameters
 
