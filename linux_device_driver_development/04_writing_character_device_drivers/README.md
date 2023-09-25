@@ -208,13 +208,13 @@ __Create Device__
 
 ```
 
-    - The book has a character device driver example in page 151.
+- The book has a character device driver example in page 151.
 
 
 __Removing everything from the system__
 
-    - Just like we implemented the steps to register a device on __sysfs__, everything needs to be removed when unloading the driver.
-    - The steps are the same steps taken earlier, but in reverse order.
+- Just like we implemented the steps to register a device on __sysfs__, everything needs to be removed when unloading the driver.
+- The steps are the same steps taken earlier, but in reverse order.
 
 ```c
     void device_destroy(struct class *cls, dev_t devt);
@@ -311,6 +311,8 @@ if (copy_from_user(dev->buffer, buf, count) != 0){
     goto out;
 }
 
+```
+
 5. Move data from buffer to physical device and update position
 
 ```c
@@ -324,3 +326,48 @@ return count;
 ```
 
 ### The ioctl file operation
+
+- Linux contains around 350 system calls
+- Only few of them linked to file operations
+- ioctl enables the developer to create methods that are beyond the ones offered out of the box.
+
+
+```c
+long ioctl (struct file *f, unsigned int cmd, unsigned long arg); 
+
+```
+- *f is a pointer to the file descriptor representing an open instance of the device
+- cmd the ioctl command
+- arg is a user parameter
+
+
+- The IOCTL command needs to be identified by a number unique to the system
+- This prevents sending the right command to the right device, or the wrong argument to the right command
+
+
+__Creating IOCTL Identifiers__
+
+- This is done by using the respective prototypes
+
+```c
+_IO(MAGIC, SEQ_NO)          // the IOCTL command does not need data transfer
+_IOR(MAGIC, SEQ_NO, TYPE)   // the IOCTL command passes information from the kernel to userspace (reading data)
+_IOW(MAGIC, SEC_NO, TYPE)
+_IORW(MAGIC, SEC_NO, TYPE)
+```
+
+
+- MAGIC is a number coded on 8 bits (0 to 255) - magic number
+- SEQ_NO is a sequence number or command ID, also on 8 bits
+- TYPE is the data type if any that will inform the kernel about the size to be copied (name of structured or data type)
+- To select the right values __Documentation/ioctl/ioctl-decoding.txt in the kernel sources
+
+__Generating an IOCTL number - a command__
+
+- The generation of your own IOCTL numbers should be in a dedicated header file.
+- The reason is that it should be available in user space as well
+- Handle duplication by means of symbolic links (for example) so that there's one in the kernel and one in userspace
+- I'll go over the example in the book p.169 - p.172
+
+
+
