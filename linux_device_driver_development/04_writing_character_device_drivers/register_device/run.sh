@@ -9,6 +9,16 @@ echo "make"
 make
 echo "--------------------------------------------------------------------"
 
+echo "Print information about the kernel object (.ko) generated "
+echo "sudo modinfo register.ko"
+sudo modinfo register.ko
+echo "--------------------------------------------------------------------"
+
+echo "File type"
+echo "file register.ko"
+file register.ko
+echo "--------------------------------------------------------------------"
+
 echo "Loading module"
 echo "sudo insmod register.ko \$1 (\$1 default value is Embedded Book Club)"
 sudo insmod register.ko $1
