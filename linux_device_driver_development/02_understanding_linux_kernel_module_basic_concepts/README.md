@@ -55,10 +55,16 @@ clean:
 sudo insmod hello.ko
 ```
 
-Check if module was loaded
+Check if module was loaded in __sysfs_
 
 ```bash
 ls -al /sys/module | grep hello
+```
+
+Check the printk statement on the Kernel's ring buffer
+
+```bash
+dmesg | tail -1
 ```
 
 ```bash
@@ -72,4 +78,38 @@ Check if module was removed
 
 ```bash
 module_param(name, type, perm)
+```
+
+# hello.c
+
+- Load and unload module
+- Change the variable name from command line 
+- Print messages using printk and pr_fmt
+- Format pr_fmt to include module and function information
+- You can run the example manually or just run
+
+```bash
+./run.sh
+```
+
+If it doesn't run, run the command below and try again.
+
+```bash
+chmod +x run.sh
+```
+
+- The run.sh script
+	- Removes all artifacts
+	- Builds the module
+	- Loads the module
+	- Checks that the module can be found under sysfs (/sys/)
+	- Prints the message sent to the kernel buffer
+	- Unloads the module
+	- Checks that the module has been removed from sysfs (/sys/)
+	- Prints message sent to the kernel
+
+- You can also interact with the module when you load it changing the variable name
+
+```bash
+./run.sh name=Mikko
 ```
