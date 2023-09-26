@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "--------------------------------------------------------------------"
 echo "Cleaning previous build"
 echo "make clean"
