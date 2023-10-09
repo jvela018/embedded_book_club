@@ -35,7 +35,7 @@ static int __init init_hello(void)
 	pr_info("Hello %s!\n", name);
 
 	/* create major and minor number*/
-	 err = alloc_chrdev_region (&dev, baseminor, count, "device_numbers");
+	err = alloc_chrdev_region (&dev, baseminor, count, "device_numbers");
 	pr_info("Device number <major>:<minor> %d:%d\n", MAJOR(dev), MINOR(dev));
 
 	/* register char device sysfs */
