@@ -30,7 +30,7 @@ echo "--------------------------------------------------------------------"
 
 echo "Printing kernel's ring buffer message after loading module"
 echo "dmesg | tail -1"
-dmesg | tail -1
+sudo dmesg | tail -1
 echo "--------------------------------------------------------------------"
 
 echo "Module loaded in sysfs"
@@ -68,7 +68,7 @@ echo "--------------------------------------------------------------------"
 
 echo "printing kernel's ring buffer message after unloading module"
 echo "dmesg | tail -1"
-dmesg | tail -1
+sudo dmesg | tail -1
 echo "--------------------------------------------------------------------"
 
 
