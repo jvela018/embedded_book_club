@@ -41,4 +41,32 @@ sudo apt-get install flex bison pkg-config
 And then build dtc
 ```bash
 make NO_PYTHON=1
-``````
+```
+
+If you installed buildroot, your __dtc__ will be under \<buildroot\>/output/host/bin/.
+
+- If you built your Kernel with buildroot, you'll find your __dtb__ binaries under \<buildroot\>/output/images
+
+- You can see if the configuration file we used for buildroot had the appropiate configuration to build the device tree blobs. Go to the buildroot directory
+
+```bash
+make menuconfig
+```
+
+Search for __TREE__. You can also double check in the .config file.
+
+- To cross compile the device tree you can manually
+```bash
+ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- make dtbs
+```
+
+You can also specify the device tree instead of using dtbs, which will write all trees.
+
+- For debugging purposes you can add PROC_DEVICETREE (I couldn't find this in buildroot/beaglebone config file). This is supposed to create /proc/device-tree directory, exposing to userspace the current device tree of a running system (live device tree).
+
+- You can also convert the binary .dtb to dts (human readable form)
+```bash
+dtc -I dtb -O dts <buildroot>/output/images/am335x-boneblack.dtb -o am335x-boneblack.dts
+```
+
+# The device tree overlay
