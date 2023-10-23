@@ -45,7 +45,7 @@ A device tree is a hardware description file, with a JSON-like formatting style 
 
 , or in the kernel under scripts.
 ```bash
-    ls /lib/modules/$(shell uname -r)/build/scripts/
+ls /lib/modules/$(uname -r)/build/scripts/ | grep dtc
 ```
 
 - If you download it from the git repo you will need to install bison, flex and pkg-config if are not already available
