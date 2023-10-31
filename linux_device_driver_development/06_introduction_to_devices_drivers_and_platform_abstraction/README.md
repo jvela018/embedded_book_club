@@ -172,3 +172,11 @@ The main difference between using the bus specific device id table and the of de
 
 ### Matching and module auto loading
 
+- From a hardware stand point the bus is the link between CPU and devices.
+- From a software stand point the bus driver is the link between devices and their drivers.
+- If a driver contains the device ID on their table, the driver will run its probe function as long as the module is loaded (matching loop)
+- Using the __matching loop__ technique means that the module has to be loaded manually from userspace using insmod/modprobe or needs to be built-in. Due to this issue a macro called __MODULE_DEVICE_TABLE(bus_type_name, array_of_ids)__ came along to support __hot-plugging.__
+- Using the MODULE_DEVICE_TABLE macro, exposes the driver information at compileation time, onto a human readable table called __modules.alias__.
+- By taking a look at the modules.alias file, you'll find in the end that the kernel informs userspace (uevents) through netlink sockets, so that when the device appears in the bus, this bus code will create and emit an event corresponding the module alias. This event is caught by the system hotplug manager (udev in most machines), loading the right module.
+
+### Device declaration - populating devices
