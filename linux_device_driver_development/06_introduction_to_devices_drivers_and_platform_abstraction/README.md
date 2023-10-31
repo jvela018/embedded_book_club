@@ -180,3 +180,98 @@ The main difference between using the bus specific device id table and the of de
 - By taking a look at the modules.alias file, you'll find in the end that the kernel informs userspace (uevents) through netlink sockets, so that when the device appears in the bus, this bus code will create and emit an event corresponding the module alias. This event is caught by the system hotplug manager (udev in most machines), loading the right module.
 
 ### Device declaration - populating devices
+
+- The MODULE_DEVICE_TABLE macro involves feeding the drivers with devices they support, but where are they declared?
+
+- There are three places:
+        - Board file (deprecated)
+        - Device tree (recommended)
+        - Advanced COnfiguration and Power Interface (ACPI)
+
+## Bus Strurcture
+
+- The bus controller is the root element in any hierarchy
+- The bus_type structure is in charged of matching devices (struct device) and drivers (struct drivers)
+
+Let's take a look at the struct bus_type (device/bus.h)
+
+```c
+struct bus_type {
+        const char              *name;
+        const char              *dev_name;
+        struct device           *dev_root;
+        const struct attribute_group **bus_groups;
+        const struct attribute_group **dev_groups;
+        const struct attribute_group **drv_groups;
+
+        int (*match)(struct device *dev, struct device_driver *drv);
+        int (*uevent)(struct device *dev, struct kobj_uevent_env *env);
+        int (*probe)(struct device *dev);
+        void (*sync_state)(struct device *dev);
+        void (*remove)(struct device *dev);
+        void (*shutdown)(struct device *dev);
+
+        int (*online)(struct device *dev);
+        int (*offline)(struct device *dev);
+
+        int (*suspend)(struct device *dev, pm_message_t state);
+        int (*resume)(struct device *dev);
+
+        int (*num_vf)(struct device *dev);
+
+        int (*dma_configure)(struct device *dev);
+        void (*dma_cleanup)(struct device *dev);
+
+        const struct dev_pm_ops *pm;
+
+        const struct iommu_ops *iommu_ops;
+
+        struct subsys_private *p;
+        struct lock_class_key lock_key;
+
+        bool need_parent_lock;
+};
+```
+
+The book only touches on:
+- name: which is the name that appears under /sys/bus. 
+
+- match: which is the method that matches devices and drivers. It compares strings, either device and driver or table and device tree compatible property. 
+- Enumerated devices (e.g., USB, PCI), compares device IDs.
+- probe: adds new device/driver added to the bus
+- remove: remove from bus
+
+The __controller driver__ is responsible for sharing bus access between devices. Every bus controler exports a set of functions for the development of drivers of devices sitting on that bus.
+
+## Matching mechanism
+
+- Export devices supported by driver using driver.of_match_table or <bus>_driver.id_table.
+- Each bus driver has a matching function run by the kernel whenever a new device or driver is registered with the bus.
+
+For example 
+```c
+static int platform_match(struct device *dev, struct device_driver *drv){
+        [...]
+};
+```
+
+```c
+static const struct i2c_device_id *i2c_match_id(const struct i2c_device_id *id, const struct i2c_client *client){
+        [...]
+}
+```
+
+### The OF matching mechanism
+
+- The device tree represents every device by a child node of a bus node.
+- At boot time, the kernel parses every bus node
+- For each device (child node) it:
+        - Identifies bus
+        - allocates platform device and initializes properties
+        - Walks through list of device drivers maintained by the bus
+
+Then for each driver in the list:
+        - Calls bus match function (__id__ and/or __of__ if supported)
+        - If it supports DT matching mechanism,match function will walk through the  of_match_table
+
+- Even if no driver supports the device, the device will be registerd in the bus, and the probing mechanism is deferred.
