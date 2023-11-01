@@ -10,7 +10,7 @@
 The structure lives in platform_device.h
 
 ```c
-truct platform_device {
+struct platform_device {
     const char  *name;
     int     id; 
     bool        id_auto;
